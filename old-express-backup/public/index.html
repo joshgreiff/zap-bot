@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zap Bot - Stream Wheel Automation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .url-box {
+            background: #e9ecef;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 0.5rem 0;
+            word-break: break-all;
+            font-family: monospace;
+        }
+        
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0.25rem;
+        }
+
+        .stream-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .stream-card h4 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .stream-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .stream-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .stream-link {
+            background: #007bff;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .stream-link:hover {
+            background: #0056b3;
+            color: white;
+        }
+
+        .end-stream-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            width: 100%;
+        }
+        
+        .lightning {
+            color: #f39c12;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="lightning">⚡</span> Zap Bot</h1>
+        <p class="subtitle">Automate your stream wheel zaps with ease</p>
+        
+        <div id="activeStreams" style="display: none;">
+            <h3>Active Streams</h3>
+            <div id="streamsList"></div>
+            <button class="btn" onclick="showCreateForm()" style="margin-top: 1rem; background: #6c757d;">
+                Create New Stream
+            </button>
+        </div>
+
+        <form id="createStreamForm">
+            <div class="form-group">
+                <label for="streamName">Stream Name</label>
+                <input type="text" id="streamName" placeholder="e.g., Jerry's Friday Night Stream" required>
+            </div>
+            
+            <button type="submit" class="btn" id="createBtn">
+                Create Stream Session
+            </button>
+        </form>
+        
+        <div id="result" class="result">
+            <h3>🎉 Stream Created Successfully!</h3>
+            <p><strong>Share this link with your viewers to check in:</strong></p>
+            <div class="url-box" id="checkinUrl"></div>
+            <button class="copy-btn" onclick="copyToClipboard('checkinUrl')">Copy Check-in Link</button>
+            
+            <p><strong>Your admin panel:</strong></p>
+            <div class="url-box" id="adminUrl"></div>
+            <button class="copy-btn" onclick="copyToClipboard('adminUrl')">Copy Admin Link</button>
+            
+            <p><strong>Your spinning wheel (share this on stream!):</strong></p>
+            <div class="url-box" id="wheelUrl"></div>
+            <button class="copy-btn" onclick="copyToClipboard('wheelUrl')">Copy Wheel Link</button>
+            
+            <p style="margin-top: 1rem; color: #666;">
+                <small>Save these links! You'll need them for your stream.</small>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Load active streams on page load
+        async function loadActiveStreams() {
+            try {
+                const response = await fetch('/api/streams');
+                if (!response.ok) return;
+                
+                const streams = await response.json();
+                
+                if (streams.length > 0) {
+                    displayActiveStreams(streams);
+                }
+            } catch (error) {
+                console.log('No active streams found');
+            }
+        }
+        
+        function displayActiveStreams(streams) {
+            const activeStreamsDiv = document.getElementById('activeStreams');
+            const streamsListDiv = document.getElementById('streamsList');
+            const createForm = document.getElementById('createStreamForm');
+            
+            streamsListDiv.innerHTML = streams.map(stream => `
+                <div class="stream-card">
+                    <h4>${stream.name}</h4>
+                    <div class="stream-meta">
+                        Created: ${new Date(stream.created_at).toLocaleString()}<br>
+                        Participants: ${stream.total_participants || 0}
+                    </div>
+                    <div class="stream-links">
+                        <a href="/checkin/${stream.id}" class="stream-link" target="_blank">Check-in</a>
+                        <a href="/admin/${stream.id}" class="stream-link" target="_blank">Admin</a>
+                        <a href="/wheel/${stream.id}" class="stream-link" target="_blank">Wheel</a>
+                    </div>
+                    <button class="end-stream-btn" onclick="endStream('${stream.id}')">
+                        End Stream
+                    </button>
+                </div>
+            `).join('');
+            
+            activeStreamsDiv.style.display = 'block';
+            createForm.style.display = 'none';
+        }
+        
+        function showCreateForm() {
+            document.getElementById('activeStreams').style.display = 'none';
+            document.getElementById('createStreamForm').style.display = 'block';
+        }
+        
+        async function endStream(streamId) {
+            if (!confirm('Are you sure you want to end this stream?')) return;
+            
+            try {
+                const response = await fetch(`/api/streams/${streamId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    location.reload(); // Refresh to show updated list
+                } else {
+                    alert('Failed to end stream');
+                }
+            } catch (error) {
+                alert('Error ending stream: ' + error.message);
+            }
+        }
+        
+        document.getElementById('createStreamForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const streamName = document.getElementById('streamName').value;
+            const createBtn = document.getElementById('createBtn');
+            
+            createBtn.disabled = true;
+            createBtn.textContent = 'Creating...';
+            
+            try {
+                const response = await fetch('/api/streams', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: streamName })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to create stream');
+                }
+                
+                const data = await response.json();
+                
+                document.getElementById('checkinUrl').textContent = data.checkInUrl;
+                document.getElementById('adminUrl').textContent = data.adminUrl;
+                document.getElementById('wheelUrl').textContent = data.wheelUrl;
+                document.getElementById('result').style.display = 'block';
+                
+                // Hide the form
+                document.getElementById('createStreamForm').style.display = 'none';
+                
+            } catch (error) {
+                alert('Error creating stream: ' + error.message);
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create Stream Session';
+            }
+        });
+        
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                // Visual feedback
+                event.target.textContent = 'Copied!';
+                setTimeout(() => {
+                    event.target.textContent = event.target.textContent.replace('Copied!', 'Copy Check-in Link').replace('Copied!', 'Copy Admin Link');
+                }, 2000);
+            });
+        }
+        
+        // Load active streams when page loads
+        loadActiveStreams();
+    </script>
+</body>
+</html> 

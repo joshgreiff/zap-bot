@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check In - Jerry's Stream Wheel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #f5576c;
+        }
+        
+        .speed-input {
+            position: relative;
+        }
+        
+        .speed-prefix {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            pointer-events: none;
+            font-size: 1rem;
+            z-index: 1;
+        }
+        
+        .speed-input input {
+            padding-left: 1rem;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+            margin-bottom: 1rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .info {
+            background: #e7f3ff;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            color: #0c5aa6;
+        }
+        
+        .wheel {
+            font-size: 2rem;
+            animation: spin 3s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .participant-count {
+            background: #f8f9fa;
+            padding: 0.5rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="wheel">🎡</span> Check In</h1>
+        <p class="subtitle">Join the stream wheel for a chance to win sats!</p>
+        
+        <div class="participant-count" id="participantCount">
+            Loading stream info...
+        </div>
+        
+        <div id="simulationNotice" style="display: none; background: #fff3cd; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; color: #856404;">
+            <strong>🧪 Demo Mode:</strong> This is currently running in simulation mode. Zaps will be simulated, not real.
+        </div>
+        
+        <div class="info">
+            <strong>How it works:</strong><br>
+            1. Enter your details below<br>
+            2. Stay tuned to the stream<br>
+            3. If your name comes up on the wheel, you win sats! ⚡
+        </div>
+        
+        <form id="checkinForm">
+            <div class="form-group">
+                <label for="displayName">Your Name</label>
+                <input type="text" id="displayName" placeholder="e.g., John" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="speedUsername">Speed Wallet Address</label>
+                <div class="speed-input">
+                    <span class="speed-prefix"></span>
+                    <input type="text" id="speedUsername" placeholder="username@speed.app" required>
+                </div>
+                <small style="color: #666; font-size: 0.8rem;">
+                    Enter your full Speed address (e.g., john@speed.app)
+                </small>
+            </div>
+            
+            <button type="submit" class="btn" id="checkinBtn">
+                Check In to Stream 🎯
+            </button>
+        </form>
+        
+        <div id="success" class="success">
+            <strong>🎉 You're checked in!</strong><br>
+            You're now eligible for the wheel. Stay tuned to the stream and good luck!
+        </div>
+        
+        <div id="error" class="error">
+            <span id="errorMessage"></span>
+        </div>
+        
+        <div style="margin-top: 2rem; font-size: 0.8rem; color: #666;">
+            <p>Make sure your Speed wallet username is correct - that's where your sats will be sent if you win!</p>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const streamId = window.location.pathname.split('/').pop();
+        
+        // Join the stream room for real-time updates
+        socket.emit('join-stream', streamId);
+        
+        // Load stream info
+        async function loadStreamInfo() {
+            try {
+                const [streamResponse, statusResponse] = await Promise.all([
+                    fetch(`/api/streams/${streamId}`),
+                    fetch('/api/status')
+                ]);
+                
+                if (!streamResponse.ok) {
+                    throw new Error('Stream not found');
+                }
+                
+                const data = await streamResponse.json();
+                const status = await statusResponse.json();
+                
+                document.getElementById('participantCount').textContent = 
+                    `${data.participants.length} people checked in for "${data.name}"`;
+                    
+                // Show simulation notice if in demo mode
+                if (status.isSimulated) {
+                    document.getElementById('simulationNotice').style.display = 'block';
+                }
+                    
+            } catch (error) {
+                document.getElementById('participantCount').textContent = 'Error loading stream info';
+            }
+        }
+        
+        // Listen for new participants
+        socket.on('new-participant', () => {
+            loadStreamInfo(); // Refresh count
+        });
+        
+        // Listen for winner announcements
+        socket.on('winner-selected', (data) => {
+            if (data.winner === document.getElementById('displayName').value) {
+                alert(`🎉 Congratulations! You won ${data.amount} sats! Check your Speed wallet.`);
+            }
+        });
+        
+        // Handle form submission
+        document.getElementById('checkinForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const displayName = document.getElementById('displayName').value.trim();
+            const speedUsername = document.getElementById('speedUsername').value.trim();
+            const checkinBtn = document.getElementById('checkinBtn');
+            
+            // Hide previous messages
+            document.getElementById('success').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            
+            if (!displayName || !speedUsername) {
+                showError('Please fill in both fields');
+                return;
+            }
+            
+            // Basic validation for Speed address format
+            if (!speedUsername.includes('@speed.app')) {
+                showError('Please enter a valid Speed address (e.g., username@speed.app)');
+                return;
+            }
+            
+            checkinBtn.disabled = true;
+            checkinBtn.textContent = 'Checking in...';
+            
+            try {
+                const response = await fetch(`/api/streams/${streamId}/checkin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: displayName,
+                        speedAddress: speedUsername
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to check in');
+                }
+                
+                // Success!
+                document.getElementById('success').style.display = 'block';
+                document.getElementById('checkinForm').style.display = 'none';
+                
+                // Refresh participant count
+                loadStreamInfo();
+                
+            } catch (error) {
+                showError(error.message);
+                checkinBtn.disabled = false;
+                checkinBtn.textContent = 'Check In to Stream 🎯';
+            }
+        });
+        
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('error').style.display = 'block';
+        }
+        
+        // Load stream info on page load
+        loadStreamInfo();
+    </script>
+</body>
+</html> 
