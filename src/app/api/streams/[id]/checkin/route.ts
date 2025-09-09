@@ -19,7 +19,7 @@ export async function POST(
     console.log(`Check-in attempt for stream ${id}: ${username} (${speedAddress})`);
     
     // Ensure stream exists for serverless resilience
-    const stream = store.ensureStreamExists(id);
+    store.ensureStreamExists(id);
     
     // Add participant
     const participant = store.addParticipant(id, username, speedAddress);
@@ -29,8 +29,9 @@ export async function POST(
       message: 'Successfully checked in!', 
       participant 
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error during check-in:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
-} 
+}

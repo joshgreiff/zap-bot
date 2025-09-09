@@ -20,7 +20,7 @@ export async function POST(
     }
     
     // Ensure stream exists for serverless resilience
-    const stream = store.ensureStreamExists(id);
+    store.ensureStreamExists(id);
     
     // Get winner's participant info (winner is participant ID)
     const participant = store.getParticipant(winner);
@@ -42,7 +42,7 @@ export async function POST(
     const status = zapResult.success ? (zapResult.simulated ? 'simulated' : 'completed') : 'failed';
     
     // Record the zap in store
-    const zap = store.addZap(id, winner, amount, status);
+    store.addZap(id, winner, amount, status);
     
     return NextResponse.json({
       message: zapResult.success ? 
@@ -54,8 +54,9 @@ export async function POST(
       zapResult: zapResult
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Spin error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
-} 
+}
