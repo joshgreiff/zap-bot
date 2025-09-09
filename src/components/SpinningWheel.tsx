@@ -38,42 +38,24 @@ export default function SpinningWheel({ participants, onWinner, isSpinning }: Sp
 
   const drawWheel = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || participants.length === 0) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const radius = Math.min(centerX, centerY) - 10;
+    const radius = Math.min(centerX, centerY) - 20;
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (participants.length === 0) {
-      // Draw empty wheel
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-      ctx.fillStyle = '#f0f0f0';
-      ctx.fill();
-      ctx.strokeStyle = '#ddd';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Draw "No participants" text
-      ctx.fillStyle = '#666';
-      ctx.font = '20px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('No participants yet', centerX, centerY);
-      return;
-    }
-
+    // Draw wheel segments
     const anglePerSegment = (2 * Math.PI) / participants.length;
-
-    // Draw segments
+    
     participants.forEach((participant, index) => {
-      const startAngle = (index * anglePerSegment) + (rotation * Math.PI / 180);
-      const endAngle = ((index + 1) * anglePerSegment) + (rotation * Math.PI / 180);
+      const startAngle = index * anglePerSegment + rotation * (Math.PI / 180);
+      const endAngle = (index + 1) * anglePerSegment + rotation * (Math.PI / 180);
 
       // Draw segment
       ctx.beginPath();
@@ -88,9 +70,8 @@ export default function SpinningWheel({ participants, onWinner, isSpinning }: Sp
 
       // Draw text
       const textAngle = startAngle + anglePerSegment / 2;
-      const textRadius = radius * 0.7;
-      const textX = centerX + Math.cos(textAngle) * textRadius;
-      const textY = centerY + Math.sin(textAngle) * textRadius;
+      const textX = centerX + Math.cos(textAngle) * (radius * 0.7);
+      const textY = centerY + Math.sin(textAngle) * (radius * 0.7);
 
       ctx.save();
       ctx.translate(textX, textY);
@@ -105,16 +86,19 @@ export default function SpinningWheel({ participants, onWinner, isSpinning }: Sp
     // Draw center circle
     ctx.beginPath();
     ctx.arc(centerX, centerY, 20, 0, 2 * Math.PI);
-    ctx.fillStyle = '#333';
+    ctx.fillStyle = '#fff';
     ctx.fill();
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 3;
+    ctx.stroke();
 
     // Draw pointer
     ctx.beginPath();
-    ctx.moveTo(centerX, centerY - radius - 5);
-    ctx.lineTo(centerX - 15, centerY - radius - 25);
-    ctx.lineTo(centerX + 15, centerY - radius - 25);
+    ctx.moveTo(centerX, centerY - radius - 10);
+    ctx.lineTo(centerX - 10, centerY - radius - 30);
+    ctx.lineTo(centerX + 10, centerY - radius - 30);
     ctx.closePath();
-    ctx.fillStyle = '#333';
+    ctx.fillStyle = '#FF6B6B';
     ctx.fill();
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = 2;
@@ -131,31 +115,32 @@ export default function SpinningWheel({ participants, onWinner, isSpinning }: Sp
     const totalRotation = (minSpins + Math.random() * (maxSpins - minSpins)) * 360;
     
     let startTime: number;
-    let startRotation = rotation;
+    const startRotation = rotation;
 
     const animate = (currentTime: number) => {
       if (!startTime) startTime = currentTime;
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / spinDuration, 1);
 
-      // Easing function for realistic deceleration
+      // Easing function for smooth deceleration
       const easeOut = 1 - Math.pow(1 - progress, 3);
       const currentRotation = startRotation + (totalRotation * easeOut);
       
-      setRotation(currentRotation % 360);
+      setRotation(currentRotation);
 
       if (progress < 1) {
         animationRef.current = requestAnimationFrame(animate);
       } else {
         setIsAnimating(false);
-        // Determine winner
-        const normalizedRotation = (360 - (currentRotation % 360)) % 360;
+        
+        // Calculate winner
+        const normalizedRotation = ((currentRotation % 360) + 360) % 360;
         const anglePerSegment = 360 / participants.length;
-        const winnerIndex = Math.floor(normalizedRotation / anglePerSegment);
+        const winnerIndex = Math.floor((360 - normalizedRotation) / anglePerSegment) % participants.length;
         const winner = participants[winnerIndex];
         
-        if (onWinner && winner) {
-          setTimeout(() => onWinner(winner), 500);
+        if (onWinner) {
+          onWinner(winner);
         }
       }
     };
@@ -163,6 +148,7 @@ export default function SpinningWheel({ participants, onWinner, isSpinning }: Sp
     animationRef.current = requestAnimationFrame(animate);
   };
 
+  // Cleanup animation on unmount
   useEffect(() => {
     return () => {
       if (animationRef.current) {
@@ -171,24 +157,33 @@ export default function SpinningWheel({ participants, onWinner, isSpinning }: Sp
     };
   }, []);
 
+  if (participants.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-96 bg-gray-100 rounded-lg">
+        <p className="text-gray-500 text-lg">No participants yet. Share the check-in link!</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center">
-      <canvas
-        ref={canvasRef}
-        width={400}
-        height={400}
-        className="border-4 border-white rounded-full shadow-2xl"
-      />
-      <div className="mt-4 text-center">
-        <div className="text-lg font-semibold text-white">
+    <div className="flex flex-col items-center space-y-4">
+      <div className="relative">
+        <canvas
+          ref={canvasRef}
+          width={400}
+          height={400}
+          className="border-4 border-gray-300 rounded-full shadow-lg"
+        />
+      </div>
+      
+      <div className="text-center">
+        <p className="text-lg font-semibold text-gray-700">
           {participants.length} participant{participants.length !== 1 ? 's' : ''} on the wheel
-        </div>
+        </p>
         {isAnimating && (
-          <div className="text-yellow-300 font-bold mt-2 animate-pulse">
-            🎡 Spinning...
-          </div>
+          <p className="text-sm text-gray-500 mt-2">🎯 Spinning...</p>
         )}
       </div>
     </div>
   );
-} 
+}

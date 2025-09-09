@@ -1,24 +1,51 @@
 import axios from 'axios';
 
+interface ZapResult {
+  success: boolean;
+  simulated?: boolean;
+  transactionId?: string;
+  amount: number;
+  recipient: string;
+  description?: string;
+  fee?: number;
+  error?: string;
+}
+
+interface BalanceResult {
+  balance: number;
+  simulated?: boolean;
+  error?: string;
+}
+
 class SpeedAPI {
-  private apiKey: string | undefined;
+  private apiKey: string;
   private apiUrl: string;
   private isSimulated: boolean;
 
   constructor() {
-    this.apiKey = process.env.SPEED_API_KEY;
-    this.apiUrl = process.env.SPEED_API_URL || 'https://api.tryspeed.com';
-    this.isSimulated = !this.apiKey; // If no API key, run in simulation mode
+    this.apiKey = process.env.SPEED_API_KEY || '';
+    this.apiUrl = process.env.SPEED_API_URL || 'https://api.speed.app';
+    this.isSimulated = !this.apiKey || process.env.NODE_ENV === 'development';
+    
+    if (this.isSimulated) {
+      console.log('🚨 Speed API running in SIMULATION mode');
+    }
   }
 
-  async sendZap(recipientAddress: string, amount: number, description = '') {
+  getStatus() {
+    return {
+      simulated: this.isSimulated,
+      apiUrl: this.apiUrl,
+      hasApiKey: !!this.apiKey
+    };
+  }
+
+  async sendZap(recipientAddress: string, amount: number, description: string): Promise<ZapResult> {
     if (this.isSimulated) {
-      // Simulate the zap for testing
-      console.log(`[SIMULATED] Sending ${amount} sats to ${recipientAddress}`);
+      console.log(`🎭 SIMULATED ZAP: ${amount} sats to ${recipientAddress} - ${description}`);
       return {
         success: true,
         simulated: true,
-        transactionId: `sim_${Date.now()}`,
         amount,
         recipient: recipientAddress,
         description
@@ -26,12 +53,10 @@ class SpeedAPI {
     }
 
     try {
-      // TODO: Replace with actual Speed API endpoint when we get documentation
-      const response = await axios.post(`${this.apiUrl}/v1/payments`, {
+      const response = await axios.post(`${this.apiUrl}/v1/payments/send`, {
         recipient: recipientAddress,
-        amount: amount,
-        description: description,
-        currency: 'sats'
+        amount,
+        description
       }, {
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
@@ -49,18 +74,19 @@ class SpeedAPI {
         fee: response.data.fee || 0
       };
 
-    } catch (error: any) {
-      console.error('Speed API Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Speed API Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return {
         success: false,
-        error: error.response?.data?.message || error.message,
+        error: errorMessage,
         amount,
         recipient: recipientAddress
       };
     }
   }
 
-  async getBalance() {
+  async getBalance(): Promise<BalanceResult> {
     if (this.isSimulated) {
       return {
         balance: 1000000, // 1M sats for testing
@@ -81,26 +107,15 @@ class SpeedAPI {
         simulated: false
       };
 
-    } catch (error: any) {
-      console.error('Speed API Balance Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Speed API Balance Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return {
         balance: 0,
-        error: error.response?.data?.message || error.message
+        error: errorMessage
       };
     }
   }
-
-  isSimulationMode() {
-    return this.isSimulated;
-  }
-
-  getStatus() {
-    return {
-      isSimulated: this.isSimulated,
-      hasApiKey: !!this.apiKey,
-      apiUrl: this.apiUrl
-    };
-  }
 }
 
-export default SpeedAPI; 
+export default SpeedAPI;
