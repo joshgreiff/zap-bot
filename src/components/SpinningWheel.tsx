@@ -18,7 +18,7 @@ export default function SpinningWheel({ participants, onWinner, isSpinning }: Sp
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [rotation, setRotation] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
 
   const colors = useMemo(() => [
     '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
