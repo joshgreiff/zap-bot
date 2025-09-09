@@ -126,7 +126,7 @@ export default function CheckinPage() {
               </div>
 
               <div>
-                <label htmlFor="speedAddress" className="block text-sm font-medium text-gray-900 mb-2">
+                <label htmlFor="speedAddress" className="block text-sm font-medium placeholder-grey-900 text-gray-900 mb-2">
                   Speed Wallet Address
                 </label>
                 <input
