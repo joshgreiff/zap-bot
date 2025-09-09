@@ -2,14 +2,16 @@
 // In production, this would be replaced with Redis or a proper database
 
 class MemoryStore {
+  private streams = new Map();
+  private participants = new Map();
+  private zaps = new Map();
+
   constructor() {
-    this.streams = new Map();
-    this.participants = new Map();
-    this.zaps = new Map();
+    // Constructor body now empty since properties are initialized above
   }
 
   // Stream operations
-  createStream(id, name) {
+  createStream(id: string, name: string) {
     const stream = {
       id,
       name,
@@ -22,7 +24,7 @@ class MemoryStore {
   }
 
   // Auto-create stream if it doesn't exist (for serverless resilience)
-  getOrCreateStream(id, name = 'Recovered Stream') {
+  getOrCreateStream(id: string, name = 'Recovered Stream') {
     let stream = this.streams.get(id);
     if (!stream) {
       console.log(`Auto-creating missing stream: ${id}`);
@@ -66,6 +68,20 @@ class MemoryStore {
 
   getParticipant(participantId) {
     return this.participants.get(participantId);
+  }
+
+  removeParticipant(participantId) {
+    const participant = this.participants.get(participantId);
+    if (participant) {
+      this.participants.delete(participantId);
+      // Update stream participant count
+      const stream = this.getStream(participant.stream_id);
+      if (stream) {
+        stream.total_participants = this.getParticipants(participant.stream_id).length;
+      }
+      return true;
+    }
+    return false;
   }
 
   // Zap operations

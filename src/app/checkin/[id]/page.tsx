@@ -125,7 +125,7 @@ export default function CheckinPage() {
             <div className="text-center">
               <div className="text-6xl mb-4">✅</div>
               <h3 className="text-2xl font-bold text-green-600 mb-2">You're in!</h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-800 mb-4 font-medium">
                 Successfully checked in to the stream. Good luck on the wheel!
               </p>
               <button
@@ -138,7 +138,7 @@ export default function CheckinPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="username" className="block text-sm font-medium text-gray-900 mb-1">
                   Your Name
                 </label>
                 <input
@@ -153,7 +153,7 @@ export default function CheckinPage() {
               </div>
 
               <div>
-                <label htmlFor="speedAddress" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="speedAddress" className="block text-sm font-medium text-gray-900 mb-1">
                   Speed Wallet Address
                 </label>
                 <input
@@ -165,7 +165,7 @@ export default function CheckinPage() {
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-700 mt-1">
                   Enter your full Speed address (e.g., worksavebitcoin@speed.app)
                 </p>
               </div>
@@ -180,7 +180,7 @@ export default function CheckinPage() {
             </form>
           )}
 
-          <div className="mt-6 pt-4 border-t border-gray-200 text-center text-sm text-gray-500">
+          <div className="mt-6 pt-4 border-t border-gray-200 text-center text-sm text-gray-700">
             Stream created: {stream ? new Date(stream.created_at).toLocaleString() : ''}
           </div>
         </div>

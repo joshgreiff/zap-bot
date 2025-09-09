@@ -35,6 +35,26 @@ export default function AdminPage() {
   const [zapAmount, setZapAmount] = useState(1000);
   const [isZapping, setIsZapping] = useState(false);
 
+  const removeParticipant = async (participantId: string) => {
+    if (!confirm('Are you sure you want to remove this participant?')) return;
+    
+    try {
+      const response = await fetch(`/api/participants/${participantId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        await loadStreamData(); // Refresh the participant list
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error}`);
+      }
+    } catch (error) {
+      console.error('Error removing participant:', error);
+      alert('Network error occurred');
+    }
+  };
+
   useEffect(() => {
     loadStreamData();
     loadApiStatus();
@@ -152,14 +172,14 @@ export default function AdminPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Participants */}
           <div className="bg-white rounded-xl p-6 shadow-2xl">
-            <h3 className="text-2xl font-bold mb-4">
+            <h3 className="text-2xl font-bold mb-4 text-gray-900">
               Participants ({participants.length})
             </h3>
             
             {participants.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-800">
                 <div className="text-4xl mb-2">👥</div>
-                <p>No participants yet</p>
+                <p className="font-medium">No participants yet</p>
                 <p className="text-sm">Share the check-in link to get started!</p>
               </div>
             ) : (
@@ -175,12 +195,24 @@ export default function AdminPage() {
                     onClick={() => setSelectedWinner(participant.id)}
                   >
                     <div className="flex justify-between items-center">
-                      <div>
-                        <div className="font-semibold">{participant.name}</div>
-                        <div className="text-sm text-gray-600">{participant.speed_address}</div>
+                      <div className="flex-1" onClick={() => setSelectedWinner(participant.id)}>
+                        <div className="font-semibold text-gray-900">{participant.name}</div>
+                        <div className="text-sm text-gray-800">{participant.speed_address}</div>
                       </div>
-                      <div className="text-xs text-gray-500">
-                        {new Date(participant.checked_in_at).toLocaleTimeString()}
+                      <div className="flex items-center gap-2">
+                        <div className="text-xs text-gray-700">
+                          {new Date(participant.checked_in_at).toLocaleTimeString()}
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeParticipant(participant.id);
+                          }}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded"
+                          title="Remove participant"
+                        >
+                          ✕
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -191,11 +223,11 @@ export default function AdminPage() {
 
           {/* Zap Controls */}
           <div className="bg-white rounded-xl p-6 shadow-2xl">
-            <h3 className="text-2xl font-bold mb-4">Send Zap</h3>
+            <h3 className="text-2xl font-bold mb-4 text-gray-900">Send Zap</h3>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
                   Selected Winner
                 </label>
                 <div className="p-3 border border-gray-300 rounded-lg bg-gray-50">
@@ -208,7 +240,7 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
                   Zap Amount (sats)
                 </label>
                 <input
@@ -231,7 +263,7 @@ export default function AdminPage() {
 
             {/* Quick Links */}
             <div className="mt-8 pt-6 border-t border-gray-200">
-              <h4 className="font-semibold mb-3">Quick Links</h4>
+              <h4 className="font-semibold mb-3 text-gray-900">Quick Links</h4>
               <div className="grid grid-cols-1 gap-2">
                 <a
                   href={`/wheel/${streamId}`}
