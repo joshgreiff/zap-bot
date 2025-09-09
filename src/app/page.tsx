@@ -107,9 +107,9 @@ export default function Home() {
             
             <div className="space-y-4">
               <div>
-                <p className="font-semibold mb-2">Share this link with your viewers to check in:</p>
+                <p className="font-semibold mb-2 text-gray-900">Share this link with your viewers to check in:</p>
                 <div className="flex gap-2">
-                  <code className="flex-1 bg-gray-100 p-2 rounded text-sm">{createdStream.checkInUrl}</code>
+                  <code className="flex-1 bg-gray-800 text-green-400 p-2 rounded text-sm font-mono">{createdStream.checkInUrl}</code>
                   <button 
                     onClick={(e) => copyToClipboard(createdStream.checkInUrl, e.target as HTMLButtonElement)}
                     className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
@@ -120,9 +120,9 @@ export default function Home() {
               </div>
 
               <div>
-                <p className="font-semibold mb-2">Your admin panel:</p>
+                <p className="font-semibold mb-2 text-gray-900">Your admin panel:</p>
                 <div className="flex gap-2">
-                  <code className="flex-1 bg-gray-100 p-2 rounded text-sm">{createdStream.adminUrl}</code>
+                  <code className="flex-1 bg-gray-800 text-blue-400 p-2 rounded text-sm font-mono">{createdStream.adminUrl}</code>
                   <button 
                     onClick={(e) => copyToClipboard(createdStream.adminUrl, e.target as HTMLButtonElement)}
                     className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
@@ -133,9 +133,9 @@ export default function Home() {
               </div>
 
               <div>
-                <p className="font-semibold mb-2">Your spinning wheel (share this on stream!):</p>
+                <p className="font-semibold mb-2 text-gray-900">Your spinning wheel (share this on stream!):</p>
                 <div className="flex gap-2">
-                  <code className="flex-1 bg-gray-100 p-2 rounded text-sm">{createdStream.wheelUrl}</code>
+                  <code className="flex-1 bg-gray-800 text-purple-400 p-2 rounded text-sm font-mono">{createdStream.wheelUrl}</code>
                   <button 
                     onClick={(e) => copyToClipboard(createdStream.wheelUrl, e.target as HTMLButtonElement)}
                     className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
@@ -146,7 +146,7 @@ export default function Home() {
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 mt-4">
+            <p className="text-sm text-gray-900 mt-4 font-medium">
               Save these links! You'll need them for your stream.
             </p>
           </div>
@@ -154,12 +154,12 @@ export default function Home() {
 
         {activeStreams.length > 0 && !createdStream && (
           <div className="bg-white rounded-xl p-6 shadow-2xl mb-8">
-            <h2 className="text-2xl font-bold mb-4">Active Streams</h2>
+            <h2 className="text-2xl font-bold mb-4 text-gray-900">Active Streams</h2>
             <div className="space-y-4">
               {activeStreams.map((stream) => (
                 <div key={stream.id} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold">{stream.name}</h3>
-                  <div className="text-sm text-gray-600 mb-3">
+                  <h3 className="text-lg font-semibold text-gray-900">{stream.name}</h3>
+                                      <div className="text-sm text-gray-900 mb-3 font-medium">
                     Created: {new Date(stream.created_at).toLocaleString()}<br />
                     Participants: {stream.total_participants || 0}
                   </div>
@@ -208,7 +208,7 @@ export default function Home() {
           <div className="bg-white rounded-xl p-6 shadow-2xl">
             <form onSubmit={createStream} className="space-y-4">
               <div>
-                <label htmlFor="streamName" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="streamName" className="block text-sm font-medium text-gray-900 mb-2">
                   Stream Name
                 </label>
                 <input
