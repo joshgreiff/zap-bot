@@ -25,6 +25,8 @@ export default function WheelPage() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [winner, setWinner] = useState<Participant | null>(null);
 
   const loadStreamData = useCallback(async () => {
     try {
@@ -50,9 +52,30 @@ export default function WheelPage() {
     return () => clearInterval(interval);
   }, [loadStreamData]);
 
-  const handleWinner = (winner: { id: string; name: string; speed_address: string }) => {
+  const handleSpin = async () => {
+    if (participants.length === 0 || isSpinning) return;
+    
+    setIsSpinning(true);
+    setWinner(null);
+    
+    try {
+      const response = await fetch(`/api/streams/${streamId}/spin`, {
+        method: 'POST',
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Spin initiated:', data);
+      }
+    } catch (error) {
+      console.error('Failed to initiate spin:', error);
+    }
+  };
+
+  const handleWinner = (winner: Participant) => {
     console.log('Winner selected:', winner);
-    // You could add more logic here, like showing a winner announcement
+    setWinner(winner);
+    setIsSpinning(false);
   };
 
   if (loading) {
@@ -83,8 +106,29 @@ export default function WheelPage() {
           <SpinningWheel
             participants={participants}
             onWinner={handleWinner}
-            isSpinning={false}
+            isSpinning={isSpinning}
           />
+          
+          {participants.length > 0 && (
+            <div className="text-center mt-6">
+              <button
+                onClick={handleSpin}
+                disabled={isSpinning}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg"
+              >
+                {isSpinning ? ' Spinning...' : ' Spin the Wheel!'}
+              </button>
+            </div>
+          )}
+
+          {winner && (
+            <div className="text-center mt-6 p-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl text-white">
+              <div className="text-4xl mb-2">🎉</div>
+              <h3 className="text-2xl font-bold mb-2">Winner!</h3>
+              <p className="text-xl font-semibold">{winner.name}</p>
+              <p className="text-sm opacity-90">{winner.speed_address}</p>
+            </div>
+          )}
         </div>
 
         {participants.length > 0 && (

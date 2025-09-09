@@ -119,14 +119,14 @@ export default function CheckinPage() {
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder-gray-500"
                   placeholder="Enter your name"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="speedAddress" className="block text-sm font-medium placeholder-grey-900 text-gray-900 mb-2">
+                <label htmlFor="speedAddress" className="block text-sm font-medium text-gray-900 mb-2">
                   Speed Wallet Address
                 </label>
                 <input
@@ -134,7 +134,7 @@ export default function CheckinPage() {
                   id="speedAddress"
                   value={speedAddress}
                   onChange={(e) => setSpeedAddress(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder-gray-500"
                   placeholder="username@speed.app"
                   required
                 />
