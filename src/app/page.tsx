@@ -9,12 +9,20 @@ interface Stream {
   total_participants: number;
 }
 
+interface CreatedStream {
+  streamId: string;
+  name: string;
+  checkInUrl: string;
+  adminUrl: string;
+  wheelUrl: string;
+}
+
 export default function Home() {
   const [activeStreams, setActiveStreams] = useState<Stream[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [streamName, setStreamName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const [createdStream, setCreatedStream] = useState<any>(null);
+  const [createdStream, setCreatedStream] = useState<CreatedStream | null>(null);
 
   useEffect(() => {
     loadActiveStreams();
@@ -33,7 +41,7 @@ export default function Home() {
       } else {
         setShowCreateForm(true);
       }
-    } catch (error) {
+    } catch {
       console.log('No active streams found');
       setShowCreateForm(true);
     }
@@ -57,8 +65,9 @@ export default function Home() {
       } else {
         throw new Error('Failed to create stream');
       }
-    } catch (error: any) {
-      alert('Error creating stream: ' + error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert('Error creating stream: ' + errorMessage);
     } finally {
       setIsCreating(false);
     }
@@ -78,8 +87,9 @@ export default function Home() {
       } else {
         alert('Failed to end stream');
       }
-    } catch (error: any) {
-      alert('Error ending stream: ' + error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert('Error ending stream: ' + errorMessage);
     }
   };
 
@@ -98,16 +108,48 @@ export default function Home() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold text-white mb-4">⚡ Zap Bot</h1>
-          <p className="text-xl text-purple-100">Automate your stream wheel zaps with ease</p>
+          <p className="text-xl text-purple-100">Stream wheel zap automation for Jerry Loves Freedom</p>
         </div>
 
-        {createdStream && (
-          <div className="bg-white rounded-xl p-6 shadow-2xl mb-8">
-            <h2 className="text-2xl font-bold text-green-600 mb-4">🎉 Stream Created Successfully!</h2>
-            
-            <div className="space-y-4">
+        {showCreateForm && !createdStream && (
+          <div className="bg-white rounded-xl p-8 shadow-2xl mb-8">
+            <h2 className="text-3xl font-bold mb-6 text-gray-900">Create New Stream</h2>
+            <form onSubmit={createStream} className="space-y-4">
               <div>
-                <p className="font-semibold mb-2 text-gray-900">Share this link with your viewers to check in:</p>
+                <label htmlFor="streamName" className="block text-sm font-medium text-gray-900 mb-2">
+                  Stream Name
+                </label>
+                <input
+                  type="text"
+                  id="streamName"
+                  value={streamName}
+                  onChange={(e) => setStreamName(e.target.value)}
+                  placeholder="e.g., PHAT Zap Friday"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isCreating}
+                className="w-full bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCreating ? 'Creating...' : 'Create Stream'}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {createdStream && (
+          <div className="bg-white rounded-xl p-8 shadow-2xl mb-8">
+            <div className="text-center mb-6">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">🎉 Stream Created!</h2>
+              <p className="text-lg text-gray-600">Your stream &quot;{createdStream.name}&quot; is ready to go!</p>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <p className="font-semibold mb-2 text-gray-900">Check-in link for viewers:</p>
                 <div className="flex gap-2">
                   <code className="flex-1 bg-gray-800 text-green-400 p-2 rounded text-sm font-mono">{createdStream.checkInUrl}</code>
                   <button 
@@ -147,7 +189,7 @@ export default function Home() {
             </div>
 
             <p className="text-sm text-gray-900 mt-4 font-medium">
-              Save these links! You'll need them for your stream.
+              Save these links! You&apos;ll need them for your stream.
             </p>
           </div>
         )}
@@ -158,80 +200,34 @@ export default function Home() {
             <div className="space-y-4">
               {activeStreams.map((stream) => (
                 <div key={stream.id} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-gray-900">{stream.name}</h3>
-                                      <div className="text-sm text-gray-900 mb-3 font-medium">
-                    Created: {new Date(stream.created_at).toLocaleString()}<br />
-                    Participants: {stream.total_participants || 0}
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">{stream.name}</h3>
+                      <p className="text-sm text-gray-600">
+                        Created: {new Date(stream.created_at).toLocaleString()}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Participants: {stream.total_participants}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => endStream(stream.id)}
+                      className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                    >
+                      End Stream
+                    </button>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
-                    <a 
-                      href={`/checkin/${stream.id}`} 
-                      target="_blank"
-                      className="bg-blue-500 text-white text-center py-2 px-4 rounded hover:bg-blue-600"
-                    >
-                      Check-in
-                    </a>
-                    <a 
-                      href={`/admin/${stream.id}`} 
-                      target="_blank"
-                      className="bg-green-500 text-white text-center py-2 px-4 rounded hover:bg-green-600"
-                    >
-                      Admin
-                    </a>
-                    <a 
-                      href={`/wheel/${stream.id}`} 
-                      target="_blank"
-                      className="bg-purple-500 text-white text-center py-2 px-4 rounded hover:bg-purple-600"
-                    >
-                      Wheel
-                    </a>
-                  </div>
-                  <button 
-                    onClick={() => endStream(stream.id)}
-                    className="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
-                  >
-                    End Stream
-                  </button>
                 </div>
               ))}
             </div>
-            <button 
-              onClick={() => setShowCreateForm(true)}
-              className="mt-4 bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600"
-            >
-              Create New Stream
-            </button>
           </div>
         )}
 
-        {showCreateForm && (
-          <div className="bg-white rounded-xl p-6 shadow-2xl">
-            <form onSubmit={createStream} className="space-y-4">
-              <div>
-                <label htmlFor="streamName" className="block text-sm font-medium text-gray-900 mb-2">
-                  Stream Name
-                </label>
-                <input
-                  type="text"
-                  id="streamName"
-                  value={streamName}
-                  onChange={(e) => setStreamName(e.target.value)}
-                  placeholder="e.g., Jerry's Friday Night Stream"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              
-              <button
-                type="submit"
-                disabled={isCreating}
-                className="w-full bg-purple-600 text-white py-3 px-6 rounded-lg hover:bg-purple-700 disabled:opacity-50 font-semibold"
-              >
-                {isCreating ? 'Creating...' : 'Create Stream Session'}
-              </button>
-            </form>
-          </div>
-        )}
+        <div className="text-center text-purple-100">
+          <p className="text-sm">
+            Built for Jerry Loves Freedom • Lightning zaps powered by Speed API
+          </p>
+        </div>
       </div>
     </div>
   );

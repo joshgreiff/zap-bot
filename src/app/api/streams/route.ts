@@ -4,10 +4,11 @@ import store from '@/lib/memory-store';
 
 export async function GET() {
   try {
-    const streams = store.getAllStreams().filter((s: any) => s.is_active);
+    const streams = store.getAllStreams().filter((s) => s.is_active);
     return NextResponse.json(streams);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
@@ -32,8 +33,9 @@ export async function POST(request: NextRequest) {
       adminUrl: `${baseUrl}/admin/${streamId}`,
       wheelUrl: `${baseUrl}/wheel/${streamId}`
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating stream:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
-} 
+}
