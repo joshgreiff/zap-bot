@@ -6,6 +6,7 @@ interface Participant {
   id: string;
   name: string;
   speed_address: string;
+  checked_in_at?: string; // Make this optional to support both types
 }
 
 interface SpinningWheelProps {
