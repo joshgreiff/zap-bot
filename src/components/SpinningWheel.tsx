@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 interface Participant {
   id: string;
@@ -20,23 +20,13 @@ export default function SpinningWheel({ participants, onWinner, isSpinning }: Sp
   const [isAnimating, setIsAnimating] = useState(false);
   const animationRef = useRef<number>();
 
-  const colors = [
+  const colors = useMemo(() => [
     '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
     '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
     '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D7BDE2'
-  ];
+  ], []);
 
-  useEffect(() => {
-    drawWheel();
-  }, [participants, rotation]);
-
-  useEffect(() => {
-    if (isSpinning && !isAnimating) {
-      spinWheel();
-    }
-  }, [isSpinning]);
-
-  const drawWheel = () => {
+  const drawWheel = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas || participants.length === 0) return;
 
@@ -103,9 +93,9 @@ export default function SpinningWheel({ participants, onWinner, isSpinning }: Sp
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = 2;
     ctx.stroke();
-  };
+  }, [participants, rotation, colors]);
 
-  const spinWheel = () => {
+  const spinWheel = useCallback(() => {
     if (participants.length === 0) return;
 
     setIsAnimating(true);
@@ -146,7 +136,17 @@ export default function SpinningWheel({ participants, onWinner, isSpinning }: Sp
     };
 
     animationRef.current = requestAnimationFrame(animate);
-  };
+  }, [participants, rotation, onWinner]);
+
+  useEffect(() => {
+    drawWheel();
+  }, [drawWheel]);
+
+  useEffect(() => {
+    if (isSpinning && !isAnimating) {
+      spinWheel();
+    }
+  }, [isSpinning, isAnimating, spinWheel]);
 
   // Cleanup animation on unmount
   useEffect(() => {

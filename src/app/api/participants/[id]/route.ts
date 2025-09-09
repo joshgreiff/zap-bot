@@ -3,10 +3,10 @@ import store from '@/lib/memory-store';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     
     const participant = store.getParticipant(id);
     if (!participant) {
@@ -19,8 +19,9 @@ export async function DELETE(
     console.log(`Participant ${id} removed`);
     
     return NextResponse.json({ message: 'Participant removed successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error removing participant:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
-} 
+}

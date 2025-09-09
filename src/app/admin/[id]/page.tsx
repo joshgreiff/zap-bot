@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 
 interface Stream {
   id: string;
@@ -276,12 +277,12 @@ export default function AdminPage() {
             >
               🎯 Spinning Wheel
             </a>
-            <a
+            <Link
               href="/"
-              className="bg-blue-500 text-white p-4 rounded-lg text-center hover:bg-blue-600 transition-colors"
+              className="bg-blue-500 text-white p-4 rounded-lg text-center hover:bg-blue-600 transition-colors block"
             >
               🏠 Home
-            </a>
+            </Link>
           </div>
         </div>
       </div>

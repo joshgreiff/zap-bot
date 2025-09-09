@@ -3,10 +3,10 @@ import store from '@/lib/memory-store';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     console.log(`Looking for stream: ${id}`);
     
     // Always ensure stream exists for serverless resilience
@@ -30,10 +30,10 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const stream = store.getStream(id);
     
     if (!stream) {
