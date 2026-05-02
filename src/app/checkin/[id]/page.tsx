@@ -9,6 +9,10 @@ interface Stream {
   created_at: string;
 }
 
+function checkinDoneKey(streamId: string) {
+  return `zapbot-checkin-done:${streamId}`;
+}
+
 export default function CheckinPage() {
   const params = useParams();
   const streamId = params.id as string;
@@ -42,6 +46,17 @@ export default function CheckinPage() {
     loadStreamInfo();
   }, [loadStreamInfo]);
 
+  useEffect(() => {
+    if (!streamId || typeof window === 'undefined') return;
+    try {
+      if (sessionStorage.getItem(checkinDoneKey(streamId))) {
+        setSuccess(true);
+      }
+    } catch {
+      // ignore private mode / blocked storage
+    }
+  }, [streamId]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -55,6 +70,11 @@ export default function CheckinPage() {
       });
 
       if (response.ok) {
+        try {
+          sessionStorage.setItem(checkinDoneKey(streamId), '1');
+        } catch {
+          // ignore
+        }
         setSuccess(true);
         setName('');
         setLightningAddress('');
@@ -97,15 +117,9 @@ export default function CheckinPage() {
           <div className="bg-white rounded-xl p-8 shadow-2xl text-center">
             <div className="text-6xl mb-4">🎉</div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">You&apos;re In!</h2>
-            <p className="text-gray-600 mb-4">
-              You&apos;ve successfully checked in for the stream. Good luck!
+            <p className="text-gray-600">
+              You&apos;re checked in for this stream. Good luck — you can close this page.
             </p>
-            <button
-              onClick={() => setSuccess(false)}
-              className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700"
-            >
-              Check In Another Person
-            </button>
           </div>
         ) : (
           <div className="bg-white rounded-xl p-8 shadow-2xl">
@@ -160,11 +174,11 @@ export default function CheckinPage() {
           </div>
         )}
 
-        <div className="text-center text-purple-100 mt-8">
-          <p className="text-sm">
-            Last updated: {new Date().toLocaleString()}
-          </p>
-        </div>
+        {!success && (
+          <div className="text-center text-purple-100 mt-8">
+            <p className="text-sm">Last updated: {new Date().toLocaleString()}</p>
+          </div>
+        )}
       </div>
     </div>
   );
