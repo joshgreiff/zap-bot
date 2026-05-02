@@ -2,6 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 import store from '@/lib/memory-store';
 
+/** Public base URL for links (check-in, admin, wheel). Prefer env for a fixed custom domain. */
+function getPublicBaseUrl(request: NextRequest): string {
+  const fromEnv = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, '');
+  if (fromEnv) return fromEnv;
+
+  const forwardedHost = request.headers.get('x-forwarded-host');
+  const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
+  if (forwardedHost) {
+    const host = forwardedHost.split(',')[0].trim();
+    return `${forwardedProto}://${host}`;
+  }
+
+  return request.nextUrl.origin;
+}
+
 export async function GET() {
   try {
     const streams = store.getAllStreams().filter((s) => s.is_active);
@@ -22,9 +37,7 @@ export async function POST(request: NextRequest) {
     const stream = store.createStream(streamId, name);
     console.log('Stream created successfully:', stream);
     
-    const baseUrl = process.env.NODE_ENV === 'production' ? 
-      'https://zap-bot.vercel.app' : 
-      `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+    const baseUrl = getPublicBaseUrl(request);
     
     return NextResponse.json({
       streamId,
