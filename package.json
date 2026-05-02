@@ -7,7 +7,7 @@
   "keywords": ["lightning", "bitcoin", "streaming", "zaps", "nextjs", "vercel"],
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
