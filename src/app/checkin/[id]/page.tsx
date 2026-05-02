@@ -15,7 +15,7 @@ export default function CheckinPage() {
   
   const [stream, setStream] = useState<Stream | null>(null);
   const [name, setName] = useState('');
-  const [speedAddress, setSpeedAddress] = useState('');
+  const [lightningAddress, setLightningAddress] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -51,13 +51,13 @@ export default function CheckinPage() {
       const response = await fetch(`/api/streams/${streamId}/checkin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: name, speedAddress })
+        body: JSON.stringify({ username: name, lightningAddress })
       });
 
       if (response.ok) {
         setSuccess(true);
         setName('');
-        setSpeedAddress('');
+        setLightningAddress('');
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Check-in failed');
@@ -126,20 +126,20 @@ export default function CheckinPage() {
               </div>
 
               <div>
-                <label htmlFor="speedAddress" className="block text-sm font-medium text-gray-900 mb-2">
-                  Speed Wallet Address
+                <label htmlFor="lightningAddress" className="block text-sm font-medium text-gray-900 mb-2">
+                  Lightning address
                 </label>
                 <input
                   type="text"
-                  id="speedAddress"
-                  value={speedAddress}
-                  onChange={(e) => setSpeedAddress(e.target.value)}
+                  id="lightningAddress"
+                  value={lightningAddress}
+                  onChange={(e) => setLightningAddress(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder-gray-500"
-                  placeholder="username@speed.app"
+                  placeholder="you@coinos.io"
                   required
                 />
                 <p className="text-sm text-gray-700 mt-1">
-                  Enter your full Speed wallet address (e.g., jerry@speed.app)
+                  Any Lightning address works (e.g. you@coinos.io, you@speed.app, or a LNURL-pay identifier).
                 </p>
               </div>
 

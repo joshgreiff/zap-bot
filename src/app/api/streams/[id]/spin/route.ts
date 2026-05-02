@@ -32,9 +32,9 @@ export async function POST(
       );
     }
     
-    // Send the zap via Speed API
+    // Send payout via Speed (recipient is the winner's Lightning address from check-in)
     const zapResult = await speedAPI.sendZap(
-      participant.speed_address,
+      participant.lightning_address,
       amount,
       `Stream wheel win - ${participant.name}`
     );
@@ -50,7 +50,7 @@ export async function POST(
         'Winner selected but zap failed',
       winner: participant.name,
       amount,
-      speedAddress: participant.speed_address,
+      lightningAddress: participant.lightning_address,
       zapResult: zapResult
     });
     

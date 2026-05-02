@@ -13,7 +13,7 @@ interface Stream {
 interface Participant {
   id: string;
   name: string;
-  speed_address: string;
+  lightning_address: string;
   checked_in_at: string;
 }
 
@@ -194,7 +194,7 @@ export default function AdminPage() {
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900">{participant.name}</h3>
-                        <p className="text-sm text-gray-600">{participant.speed_address}</p>
+                        <p className="text-sm text-gray-600">{participant.lightning_address}</p>
                         <p className="text-xs text-gray-500">
                           Checked in: {new Date(participant.checked_in_at).toLocaleString()}
                         </p>

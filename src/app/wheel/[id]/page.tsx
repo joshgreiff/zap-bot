@@ -13,7 +13,7 @@ interface Stream {
 interface Participant {
   id: string;
   name: string;
-  speed_address: string;
+  lightning_address: string;
   checked_in_at: string;
 }
 
@@ -126,7 +126,7 @@ export default function WheelPage() {
               <div className="text-4xl mb-2">🎉</div>
               <h3 className="text-2xl font-bold mb-2">Winner!</h3>
               <p className="text-xl font-semibold">{winner.name}</p>
-              <p className="text-sm opacity-90">{winner.speed_address}</p>
+              <p className="text-sm opacity-90">{winner.lightning_address}</p>
             </div>
           )}
         </div>
@@ -138,7 +138,7 @@ export default function WheelPage() {
               {participants.map((participant) => (
                 <div key={participant.id} className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="font-semibold text-gray-900">{participant.name}</h3>
-                  <p className="text-sm text-gray-600">{participant.speed_address}</p>
+                  <p className="text-sm text-gray-600">{participant.lightning_address}</p>
                   <p className="text-xs text-gray-500">
                     {new Date(participant.checked_in_at).toLocaleString()}
                   </p>

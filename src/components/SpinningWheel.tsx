@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 interface Participant {
   id: string;
   name: string;
-  speed_address: string;
+  lightning_address: string;
   checked_in_at: string;
 }
 

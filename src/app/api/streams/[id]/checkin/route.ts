@@ -7,22 +7,26 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const { username, speedAddress } = await request.json();
-    
-    if (!username || !speedAddress) {
+    const body = await request.json();
+    const lightningAddress: string | undefined =
+      typeof body.lightningAddress === 'string' ? body.lightningAddress.trim() :
+      typeof body.speedAddress === 'string' ? body.speedAddress.trim() : undefined;
+    const username: string | undefined =
+      typeof body.username === 'string' ? body.username.trim() : undefined;
+
+    if (!username || !lightningAddress) {
       return NextResponse.json(
-        { error: 'Username and Speed address are required' }, 
+        { error: 'Name and Lightning address are required' },
         { status: 400 }
       );
     }
-    
-    console.log(`Check-in attempt for stream ${id}: ${username} (${speedAddress})`);
-    
+
+    console.log(`Check-in attempt for stream ${id}: ${username} (${lightningAddress})`);
+
     // Ensure stream exists for serverless resilience
     store.ensureStreamExists(id);
-    
-    // Add participant
-    const participant = store.addParticipant(id, username, speedAddress);
+
+    const participant = store.addParticipant(id, username, lightningAddress);
     console.log('New participant added:', participant);
     
     return NextResponse.json({ 

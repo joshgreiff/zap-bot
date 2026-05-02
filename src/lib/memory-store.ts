@@ -12,7 +12,7 @@ interface Participant {
   id: string;
   stream_id: string;
   name: string;
-  speed_address: string;
+  lightning_address: string;
   checked_in_at: string;
 }
 
@@ -62,13 +62,13 @@ class MemoryStore {
   }
 
   // Participant operations
-  addParticipant(streamId: string, name: string, speedAddress: string): Participant {
+  addParticipant(streamId: string, name: string, lightningAddress: string): Participant {
     const participantId = `${streamId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const participant: Participant = {
       id: participantId,
       stream_id: streamId,
       name,
-      speed_address: speedAddress,
+      lightning_address: lightningAddress,
       checked_in_at: new Date().toISOString()
     };
     
@@ -80,7 +80,7 @@ class MemoryStore {
       stream.total_participants = this.getParticipants(streamId).length;
     }
     
-    console.log(`Added participant: ${name} (${speedAddress}) to stream: ${streamId}`);
+    console.log(`Added participant: ${name} (${lightningAddress}) to stream: ${streamId}`);
     return participant;
   }
 
