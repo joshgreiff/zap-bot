@@ -17,6 +17,8 @@ interface Participant {
   checked_in_at: string;
 }
 
+const DEFAULT_DOCUMENT_TITLE = '⚡ Zap Bot - Lightning Stream Automation';
+
 export default function WheelPage() {
   const params = useParams();
   const streamId = params.id as string;
@@ -51,6 +53,23 @@ export default function WheelPage() {
     const interval = setInterval(loadStreamData, 2000); // Refresh every 2 seconds
     return () => clearInterval(interval);
   }, [loadStreamData]);
+
+  useEffect(() => {
+    if (stream?.name) {
+      document.title = `🎯 Wheel: ${stream.name} | Zap Bot`;
+    } else if (!loading && error) {
+      document.title = '🎯 Wheel · error | Zap Bot';
+    } else if (streamId) {
+      const short = streamId.replace(/-/g, '').slice(0, 8);
+      document.title = `🎯 Wheel · ${short} | Zap Bot`;
+    }
+  }, [stream, loading, error, streamId]);
+
+  useEffect(() => {
+    return () => {
+      document.title = DEFAULT_DOCUMENT_TITLE;
+    };
+  }, []);
 
   const handleSpin = async () => {
     if (participants.length === 0 || isSpinning) return;
