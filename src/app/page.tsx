@@ -120,7 +120,7 @@ export default function Home() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold text-white mb-4">⚡ Zap Bot</h1>
-          <p className="text-xl text-white opacity-90">Stream wheel zap automation for Jerry Loves Freedom</p>
+          <p className="text-xl text-white opacity-90">Stream wheel zap automation</p>
         </div>
 
         {showCreateForm && (
@@ -256,8 +256,10 @@ export default function Home() {
         )}
 
         <footer className="text-center text-white opacity-80 mt-8">
-          <p>&copy; {new Date().getFullYear()} Zap Bot. Built with ❤️ for Jerry Loves Freedom.</p>
-          <p className="text-sm mt-2">Support development: <a href="https://geyser.fund/joshgreiff" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">geyser.fund/joshgreiff</a></p>
+          <p>&copy; {new Date().getFullYear()} Zap Bot.</p>
+          <p className="text-sm mt-2">
+            Tips: <span className="font-mono">worksavebitcoin@coinos.io</span>
+          </p>
         </footer>
       </div>
     </div>

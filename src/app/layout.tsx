@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "⚡ Zap Bot - Lightning Stream Automation",
-  description: "Automate Bitcoin Lightning zaps for stream viewers. Built for Jerry Loves Freedom.",
+  description: "Automate Bitcoin Lightning zaps for stream viewers.",
 };
 
 export default function RootLayout({
