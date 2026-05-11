@@ -4,7 +4,14 @@
   "private": true,
   "description": "Stream wheel zap automation for Jerry Loves Freedom - Next.js version",
   "author": "Josh Greiff",
-  "keywords": ["lightning", "bitcoin", "streaming", "zaps", "nextjs", "vercel"],
+  "keywords": [
+    "lightning",
+    "bitcoin",
+    "streaming",
+    "zaps",
+    "nextjs",
+    "vercel"
+  ],
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -17,6 +24,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "next": "15.5.15",
+    "postgres": "^3.4.9",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "socket.io": "^4.8.1",

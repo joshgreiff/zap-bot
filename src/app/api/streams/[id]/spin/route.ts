@@ -20,10 +20,10 @@ export async function POST(
     }
     
     // Ensure stream exists for serverless resilience
-    store.ensureStreamExists(id);
+    await store.ensureStreamExists(id);
     
     // Get winner's participant info (winner is participant ID)
-    const participant = store.getParticipant(winner);
+    const participant = await store.getParticipant(winner);
     
     if (!participant) {
       return NextResponse.json(
@@ -42,7 +42,7 @@ export async function POST(
     const status = zapResult.success ? (zapResult.simulated ? 'simulated' : 'completed') : 'failed';
     
     // Record the zap in store
-    store.addZap(id, winner, amount, status);
+    await store.addZap(id, winner, amount, status);
     
     return NextResponse.json({
       message: zapResult.success ? 

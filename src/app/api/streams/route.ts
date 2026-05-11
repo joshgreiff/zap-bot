@@ -19,7 +19,7 @@ function getPublicBaseUrl(request: NextRequest): string {
 
 export async function GET() {
   try {
-    const streams = store.getAllStreams().filter((s) => s.is_active);
+    const streams = (await store.getAllStreams()).filter((s) => s.is_active);
     return NextResponse.json(streams);
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     
     console.log(`Creating stream: ${streamId} with name: ${name}`);
     
-    const stream = store.createStream(streamId, name);
+    const stream = await store.createStream(streamId, name);
     console.log('Stream created successfully:', stream);
     
     const baseUrl = getPublicBaseUrl(request);

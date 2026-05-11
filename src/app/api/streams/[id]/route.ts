@@ -10,16 +10,16 @@ export async function GET(
     console.log(`Looking for stream: ${id}`);
     
     // Always ensure stream exists for serverless resilience
-    const stream = store.ensureStreamExists(id);
+    const stream = await store.ensureStreamExists(id);
     console.log('Stream ensured:', stream);
     
-    const participants = store.getParticipants(id);
+    const participants = await store.getParticipants(id);
     console.log(`Found ${participants.length} participants`);
     
     return NextResponse.json({
       ...stream,
       participants,
-      stats: store.getStreamStats(id)
+      stats: await store.getStreamStats(id)
     });
   } catch (error: unknown) {
     console.error('Error getting stream:', error);
@@ -34,14 +34,14 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const stream = store.getStream(id);
+    const stream = await store.getStream(id);
     
     if (!stream) {
       return NextResponse.json({ error: 'Stream not found' }, { status: 404 });
     }
     
     // Mark stream as inactive
-    stream.is_active = false;
+    await store.endStream(id);
     console.log(`Stream ${id} ended`);
     
     return NextResponse.json({ message: 'Stream ended successfully' });

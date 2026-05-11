@@ -8,7 +8,7 @@ export async function GET() {
   try {
     const status = speedAPI.getStatus();
     const balance = await speedAPI.getBalance();
-    const storeStatus = store.getStatus();
+    const storeStatus = await store.getStatus();
     
     return NextResponse.json({
       ...status,

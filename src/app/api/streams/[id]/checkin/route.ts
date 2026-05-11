@@ -24,9 +24,9 @@ export async function POST(
     console.log(`Check-in attempt for stream ${id}: ${username} (${lightningAddress})`);
 
     // Ensure stream exists for serverless resilience
-    store.ensureStreamExists(id);
+    await store.ensureStreamExists(id);
 
-    const participant = store.addParticipant(id, username, lightningAddress);
+    const participant = await store.addParticipant(id, username, lightningAddress);
     console.log('New participant added:', participant);
     
     return NextResponse.json({ 

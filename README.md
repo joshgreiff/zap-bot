@@ -71,6 +71,7 @@ A robust, modern web application built with Next.js that automates Bitcoin Light
 
 2. **Set environment variables in Vercel dashboard**
    - `SPEED_API_KEY` (optional - runs in simulation mode without it)
+   - `DATABASE_URL` (recommended - persists streams, participants, and payouts)
 
 3. **Deploy**
    ```bash
@@ -121,6 +122,7 @@ A robust, modern web application built with Next.js that automates Bitcoin Light
 
 ### Participants
 - `POST /api/streams/[id]/checkin` - Check in participant
+- `GET /api/streams/[id]/export` - Download participant addresses as CSV
 
 ### Zaps
 - `POST /api/streams/[id]/spin` - Select winner and send zap
@@ -142,6 +144,9 @@ A robust, modern web application built with Next.js that automates Bitcoin Light
 SPEED_API_KEY=your_speed_api_key
 SPEED_API_URL=https://api.tryspeed.com
 
+# Persistent storage (recommended for production)
+DATABASE_URL=postgres://user:password@host:5432/database
+
 # Next.js (auto-detected)
 NODE_ENV=production
 ```
@@ -150,8 +155,8 @@ NODE_ENV=production
 
 ### Serverless-First Design
 - Next.js API routes handle all backend logic
-- In-memory store for session data
-- No database required for basic functionality
+- Postgres-backed store when `DATABASE_URL` is configured
+- In-memory fallback for local demo/testing without a database
 - Automatic scaling on Vercel
 
 ### Real-Time Updates

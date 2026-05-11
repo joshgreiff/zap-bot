@@ -260,7 +260,7 @@ export default function AdminPage() {
         {/* Quick Links */}
         <div className="bg-white rounded-xl p-6 shadow-2xl mt-8">
           <h2 className="text-2xl font-bold mb-4 text-gray-900">Quick Links</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <a
               href={`/checkin/${streamId}`}
               target="_blank"
@@ -276,6 +276,12 @@ export default function AdminPage() {
               className="bg-purple-500 text-white p-4 rounded-lg text-center hover:bg-purple-600 transition-colors"
             >
               🎯 Spinning Wheel
+            </a>
+            <a
+              href={`/api/streams/${streamId}/export`}
+              className="bg-orange-500 text-white p-4 rounded-lg text-center hover:bg-orange-600 transition-colors"
+            >
+              ⬇️ Export Addresses
             </a>
             <Link
               href="/"

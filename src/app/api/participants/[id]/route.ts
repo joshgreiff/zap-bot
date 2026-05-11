@@ -8,13 +8,13 @@ export async function DELETE(
   try {
     const { id } = await params;
     
-    const participant = store.getParticipant(id);
+    const participant = await store.getParticipant(id);
     if (!participant) {
       return NextResponse.json({ error: 'Participant not found' }, { status: 404 });
     }
     
     // Remove participant from store
-    store.removeParticipant(id);
+    await store.removeParticipant(id);
     
     console.log(`Participant ${id} removed`);
     
