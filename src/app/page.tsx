@@ -1,13 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-
-interface Stream {
-  id: string;
-  name: string;
-  created_at: string;
-  total_participants: number;
-}
+import { useState } from 'react';
 
 interface CreatedStream {
   streamId: string;
@@ -18,38 +11,10 @@ interface CreatedStream {
 }
 
 export default function Home() {
-  const [activeStreams, setActiveStreams] = useState<Stream[]>([]);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(true);
   const [streamName, setStreamName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [createdStream, setCreatedStream] = useState<CreatedStream | null>(null);
-
-  useEffect(() => {
-    loadActiveStreams();
-  }, []);
-
-  const loadActiveStreams = async () => {
-    try {
-      const response = await fetch('/api/streams');
-      if (response.ok) {
-        const streams: Stream[] = await response.json();
-        if (streams.length > 0) {
-          setActiveStreams(streams);
-        } else {
-          setShowCreateForm(true);
-        }
-      } else {
-        setShowCreateForm(true);
-      }
-    } catch (error: unknown) {
-      let errorMessage = 'An unknown error occurred';
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      console.log('Error loading active streams:', errorMessage);
-      setShowCreateForm(true);
-    }
-  };
 
   const createStream = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -175,45 +140,6 @@ export default function Home() {
             <p className="text-sm text-gray-900 mt-4 font-medium">
               Save these links! You&apos;ll need them for your stream.
             </p>
-          </div>
-        )}
-
-        {activeStreams.length > 0 && !createdStream && (
-          <div className="bg-white rounded-xl p-6 shadow-2xl mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Active Streams</h2>
-            <div className="space-y-4">
-              {activeStreams.map((stream) => (
-                <div key={stream.id} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{stream.name}</h3>
-                  <p className="text-gray-800 mb-1">Participants: {stream.total_participants}</p>
-                  <p className="text-gray-700 text-sm mb-4">Created: {new Date(stream.created_at).toLocaleString()}</p>
-                  <div className="flex flex-wrap gap-2">
-                    <a
-                      href={`/checkin/${stream.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600"
-                    >
-                      Check-in Link
-                    </a>
-                    <a
-                      href={`/wheel/${stream.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-purple-500 text-white px-3 py-1 rounded-md text-sm hover:bg-purple-600"
-                    >
-                      Spinning Wheel
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {!showCreateForm && !createdStream && activeStreams.length === 0 && (
-          <div className="bg-white rounded-xl p-6 shadow-2xl text-center text-gray-900">
-            <p className="text-lg">Loading active streams...</p>
           </div>
         )}
 
