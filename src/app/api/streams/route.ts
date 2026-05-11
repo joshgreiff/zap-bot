@@ -38,12 +38,13 @@ export async function POST(request: NextRequest) {
     console.log('Stream created successfully:', stream);
     
     const baseUrl = getPublicBaseUrl(request);
+    const adminToken = encodeURIComponent(stream.admin_token);
     
     return NextResponse.json({
       streamId,
       name,
       checkInUrl: `${baseUrl}/checkin/${streamId}`,
-      adminUrl: `${baseUrl}/admin/${streamId}`,
+      adminUrl: `${baseUrl}/admin/${streamId}?token=${adminToken}`,
       wheelUrl: `${baseUrl}/wheel/${streamId}`
     });
   } catch (error: unknown) {

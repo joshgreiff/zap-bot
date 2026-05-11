@@ -15,10 +15,15 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const adminToken = new URL(request.url).searchParams.get('token');
     const stream = await store.getStream(id);
 
     if (!stream) {
       return NextResponse.json({ error: 'Stream not found' }, { status: 404 });
+    }
+
+    if (!(await store.validateAdminToken(id, adminToken))) {
+      return NextResponse.json({ error: 'Invalid admin token' }, { status: 401 });
     }
 
     const participants = await store.getParticipants(id);

@@ -7,18 +7,28 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const adminToken = request.nextUrl.searchParams.get('token');
     console.log(`Looking for stream: ${id}`);
     
     // Always ensure stream exists for serverless resilience
     const stream = await store.ensureStreamExists(id);
     console.log('Stream ensured:', stream);
     
+    const isAdminRequest = adminToken !== null;
+    const isAdmin = isAdminRequest && await store.validateAdminToken(id, adminToken);
+
+    if (isAdminRequest && !isAdmin) {
+      return NextResponse.json({ error: 'Invalid admin token' }, { status: 401 });
+    }
+
     const participants = await store.getParticipants(id);
     console.log(`Found ${participants.length} participants`);
     
     return NextResponse.json({
       ...stream,
-      participants,
+      participants: isAdmin
+        ? participants
+        : participants.map(({ id, name, checked_in_at }) => ({ id, name, checked_in_at })),
       stats: await store.getStreamStats(id)
     });
   } catch (error: unknown) {
@@ -34,10 +44,15 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    const adminToken = request.nextUrl.searchParams.get('token');
     const stream = await store.getStream(id);
     
     if (!stream) {
       return NextResponse.json({ error: 'Stream not found' }, { status: 404 });
+    }
+
+    if (!(await store.validateAdminToken(id, adminToken))) {
+      return NextResponse.json({ error: 'Invalid admin token' }, { status: 401 });
     }
     
     // Mark stream as inactive

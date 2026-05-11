@@ -7,10 +7,15 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    const adminToken = request.nextUrl.searchParams.get('token');
     
     const participant = await store.getParticipant(id);
     if (!participant) {
       return NextResponse.json({ error: 'Participant not found' }, { status: 404 });
+    }
+
+    if (!(await store.validateAdminToken(participant.stream_id, adminToken))) {
+      return NextResponse.json({ error: 'Invalid admin token' }, { status: 401 });
     }
     
     // Remove participant from store

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 interface Stream {
@@ -25,7 +25,10 @@ interface ApiStatus {
 
 export default function AdminPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const streamId = params.id as string;
+  const adminToken = searchParams.get('token') || '';
+  const adminQuery = `token=${encodeURIComponent(adminToken)}`;
   
   const [stream, setStream] = useState<Stream | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -49,22 +52,29 @@ export default function AdminPage() {
   };
 
   const loadStreamData = useCallback(async () => {
+    if (!adminToken) {
+      setError('Missing admin token');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch(`/api/streams/${streamId}`);
+      const response = await fetch(`/api/streams/${streamId}?${adminQuery}`);
       if (response.ok) {
         const data = await response.json();
         setStream(data);
         setParticipants(data.participants || []);
         setError('');
       } else {
-        setError('Stream not found');
+        const data = await response.json().catch(() => null);
+        setError(data?.error || 'Stream not found');
       }
     } catch {
       setError('Failed to load stream data');
     } finally {
       setLoading(false);
     }
-  }, [streamId]);
+  }, [streamId, adminToken, adminQuery]);
 
   useEffect(() => {
     loadStreamData();
@@ -77,7 +87,7 @@ export default function AdminPage() {
     if (!confirm('Are you sure you want to remove this participant?')) return;
 
     try {
-      const response = await fetch(`/api/participants/${participantId}`, {
+      const response = await fetch(`/api/participants/${participantId}?${adminQuery}`, {
         method: 'DELETE'
       });
 
@@ -101,7 +111,7 @@ export default function AdminPage() {
     setIsSpinning(true);
 
     try {
-      const response = await fetch(`/api/streams/${streamId}/spin`, {
+      const response = await fetch(`/api/streams/${streamId}/spin?${adminQuery}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ winner: selectedWinner, amount: zapAmount })
@@ -278,7 +288,7 @@ export default function AdminPage() {
               🎯 Spinning Wheel
             </a>
             <a
-              href={`/api/streams/${streamId}/export`}
+              href={`/api/streams/${streamId}/export?${adminQuery}`}
               className="bg-orange-500 text-white p-4 rounded-lg text-center hover:bg-orange-600 transition-colors"
             >
               ⬇️ Export Addresses

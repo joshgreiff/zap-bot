@@ -13,7 +13,7 @@ interface Stream {
 interface Participant {
   id: string;
   name: string;
-  lightning_address: string;
+  lightning_address?: string;
   checked_in_at: string;
 }
 
@@ -71,24 +71,11 @@ export default function WheelPage() {
     };
   }, []);
 
-  const handleSpin = async () => {
+  const handleSpin = () => {
     if (participants.length === 0 || isSpinning) return;
     
     setIsSpinning(true);
     setWinner(null);
-    
-    try {
-      const response = await fetch(`/api/streams/${streamId}/spin`, {
-        method: 'POST',
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Spin initiated:', data);
-      }
-    } catch (error) {
-      console.error('Failed to initiate spin:', error);
-    }
   };
 
   const handleWinner = (winner: Participant) => {

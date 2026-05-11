@@ -11,6 +11,7 @@ export async function POST(
   try {
     const { id } = await params;
     const { winner, amount = 1000 } = await request.json();
+    const adminToken = request.nextUrl.searchParams.get('token');
     
     if (!winner) {
       return NextResponse.json(
@@ -21,6 +22,10 @@ export async function POST(
     
     // Ensure stream exists for serverless resilience
     await store.ensureStreamExists(id);
+
+    if (!(await store.validateAdminToken(id, adminToken))) {
+      return NextResponse.json({ error: 'Invalid admin token' }, { status: 401 });
+    }
     
     // Get winner's participant info (winner is participant ID)
     const participant = await store.getParticipant(winner);

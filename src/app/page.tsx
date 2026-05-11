@@ -81,30 +81,6 @@ export default function Home() {
     }
   };
 
-  const endStream = async (streamId: string) => {
-    if (!confirm('Are you sure you want to end this stream?')) return;
-
-    try {
-      const response = await fetch(`/api/streams/${streamId}`, {
-        method: 'DELETE'
-      });
-
-      if (response.ok) {
-        loadActiveStreams();
-        setCreatedStream(null);
-      } else {
-        const errorData = await response.json();
-        alert('Failed to end stream: ' + (errorData.error || 'Unknown error'));
-      }
-    } catch (error: unknown) {
-      let errorMessage = 'An unknown error occurred';
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      alert('Error ending stream: ' + errorMessage);
-    }
-  };
-
   const copyToClipboard = (text: string, button: HTMLButtonElement) => {
     navigator.clipboard.writeText(text).then(() => {
       const originalText = button.textContent;
@@ -211,7 +187,7 @@ export default function Home() {
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">{stream.name}</h3>
                   <p className="text-gray-800 mb-1">Participants: {stream.total_participants}</p>
                   <p className="text-gray-700 text-sm mb-4">Created: {new Date(stream.created_at).toLocaleString()}</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-2">
                     <a
                       href={`/checkin/${stream.id}`}
                       target="_blank"
@@ -219,14 +195,6 @@ export default function Home() {
                       className="bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600"
                     >
                       Check-in Link
-                    </a>
-                    <a
-                      href={`/admin/${stream.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600"
-                    >
-                      Admin Panel
                     </a>
                     <a
                       href={`/wheel/${stream.id}`}
@@ -237,12 +205,6 @@ export default function Home() {
                       Spinning Wheel
                     </a>
                   </div>
-                  <button
-                    onClick={() => endStream(stream.id)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 text-sm"
-                  >
-                    End Stream
-                  </button>
                 </div>
               ))}
             </div>
@@ -257,6 +219,17 @@ export default function Home() {
 
         <footer className="text-center text-white opacity-80 mt-8">
           <p>&copy; {new Date().getFullYear()} Zap Bot.</p>
+          <p className="text-sm mt-2">
+            Inspired by{' '}
+            <a
+              href="https://www.youtube.com/@jerrylovesfreedom"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:opacity-100"
+            >
+              Jerry Loves Freedom
+            </a>
+          </p>
           <p className="text-sm mt-2">
             Tips: <span className="font-mono">monetarymondays@coinos.io</span>
           </p>

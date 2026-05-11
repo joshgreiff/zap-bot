@@ -34,6 +34,10 @@ type StreamRow = {
   total_participants: number;
 };
 
+type CreatedStream = Stream & {
+  admin_token: string;
+};
+
 type ParticipantRow = {
   id: string;
   stream_id: string;
@@ -96,6 +100,7 @@ function mapZap(row: ZapRow): Zap {
 
 class MemoryStore {
   private streams: Map<string, Stream> = new Map();
+  private adminTokens: Map<string, string> = new Map();
   private participants: Map<string, Participant> = new Map();
   private zaps: Map<string, Zap> = new Map();
   private schemaReady = false;
@@ -107,10 +112,16 @@ class MemoryStore {
       CREATE TABLE IF NOT EXISTS streams (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
+        admin_token TEXT,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         is_active BOOLEAN NOT NULL DEFAULT TRUE,
         total_participants INTEGER NOT NULL DEFAULT 0
       )
+    `;
+
+    await sql`
+      ALTER TABLE streams
+      ADD COLUMN IF NOT EXISTS admin_token TEXT
     `;
 
     await sql`
@@ -139,17 +150,20 @@ class MemoryStore {
   }
 
   // Stream operations
-  async createStream(id: string, name: string): Promise<Stream> {
+  async createStream(id: string, name: string, adminToken: string = uuidv4()): Promise<CreatedStream> {
     await this.ensureSchema();
 
     if (sql) {
-      const [stream] = await sql<StreamRow[]>`
-        INSERT INTO streams (id, name)
-        VALUES (${id}, ${name})
-        RETURNING id, name, created_at, is_active, total_participants
+      const [stream] = await sql<(StreamRow & { admin_token: string })[]>`
+        INSERT INTO streams (id, name, admin_token)
+        VALUES (${id}, ${name}, ${adminToken})
+        RETURNING id, name, admin_token, created_at, is_active, total_participants
       `;
       console.log(`Created stream: ${id} with name: ${name}`);
-      return mapStream(stream);
+      return {
+        ...mapStream(stream),
+        admin_token: stream.admin_token,
+      };
     }
 
     const stream: Stream = {
@@ -160,8 +174,12 @@ class MemoryStore {
       total_participants: 0
     };
     this.streams.set(id, stream);
+    this.adminTokens.set(id, adminToken);
     console.log(`Created stream: ${id} with name: ${name}`);
-    return stream;
+    return {
+      ...stream,
+      admin_token: adminToken,
+    };
   }
 
   async ensureStreamExists(id: string, name: string = 'Unknown Stream'): Promise<Stream> {
@@ -198,6 +216,24 @@ class MemoryStore {
     }
 
     return this.streams.get(id);
+  }
+
+  async validateAdminToken(streamId: string, token: string | null | undefined): Promise<boolean> {
+    if (!token) return false;
+
+    await this.ensureSchema();
+
+    if (sql) {
+      const [stream] = await sql<{ id: string }[]>`
+        SELECT id
+        FROM streams
+        WHERE id = ${streamId}
+          AND admin_token = ${token}
+      `;
+      return !!stream;
+    }
+
+    return this.adminTokens.get(streamId) === token;
   }
 
   async getAllStreams(): Promise<Stream[]> {
