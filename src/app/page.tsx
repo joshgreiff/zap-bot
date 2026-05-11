@@ -258,7 +258,7 @@ export default function Home() {
         <footer className="text-center text-white opacity-80 mt-8">
           <p>&copy; {new Date().getFullYear()} Zap Bot.</p>
           <p className="text-sm mt-2">
-            Tips: <span className="font-mono">worksavebitcoin@coinos.io</span>
+            Tips: <span className="font-mono">monetarymondays@coinos.io</span>
           </p>
         </footer>
       </div>

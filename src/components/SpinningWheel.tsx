@@ -19,7 +19,9 @@ export default function SpinningWheel({ participants, onWinner, isSpinning }: Sp
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [rotation, setRotation] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [lockedParticipants, setLockedParticipants] = useState<Participant[] | null>(null);
   const animationRef = useRef<number | undefined>(undefined);
+  const wheelParticipants = lockedParticipants ?? participants;
 
   const colors = useMemo(() => [
     '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
@@ -29,7 +31,7 @@ export default function SpinningWheel({ participants, onWinner, isSpinning }: Sp
 
   const drawWheel = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas || participants.length === 0) return;
+    if (!canvas || wheelParticipants.length === 0) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -42,9 +44,9 @@ export default function SpinningWheel({ participants, onWinner, isSpinning }: Sp
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Draw wheel segments
-    const anglePerSegment = (2 * Math.PI) / participants.length;
+    const anglePerSegment = (2 * Math.PI) / wheelParticipants.length;
     
-    participants.forEach((participant, index) => {
+    wheelParticipants.forEach((participant, index) => {
       const startAngle = index * anglePerSegment + rotation * (Math.PI / 180);
       const endAngle = (index + 1) * anglePerSegment + rotation * (Math.PI / 180);
 
@@ -94,11 +96,13 @@ export default function SpinningWheel({ participants, onWinner, isSpinning }: Sp
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = 2;
     ctx.stroke();
-  }, [participants, rotation, colors]);
+  }, [wheelParticipants, rotation, colors]);
 
   const spinWheel = useCallback(() => {
     if (participants.length === 0) return;
 
+    const spinParticipants = participants;
+    setLockedParticipants(spinParticipants);
     setIsAnimating(true);
     const spinDuration = 3000; // 3 seconds
     const minSpins = 5;
@@ -124,15 +128,19 @@ export default function SpinningWheel({ participants, onWinner, isSpinning }: Sp
       } else {
         setIsAnimating(false);
         
-        // Calculate winner
+        // Canvas angles start at 3 o'clock, while the pointer is fixed at 12 o'clock.
         const normalizedRotation = ((currentRotation % 360) + 360) % 360;
-        const anglePerSegment = 360 / participants.length;
-        const winnerIndex = Math.floor((360 - normalizedRotation) / anglePerSegment) % participants.length;
-        const winner = participants[winnerIndex];
+        const pointerAngle = 270;
+        const anglePerSegment = 360 / spinParticipants.length;
+        const winnerAngle = (pointerAngle - normalizedRotation + 360) % 360;
+        const winnerIndex = Math.floor(winnerAngle / anglePerSegment) % spinParticipants.length;
+        const winner = spinParticipants[winnerIndex];
         
         if (onWinner) {
           onWinner(winner);
         }
+
+        setLockedParticipants(null);
       }
     };
 
